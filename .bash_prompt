@@ -57,10 +57,13 @@ function parse_git_branch() {
 	#Only show anything if the directory is actually a git project
 	if [ -n "${branch}" ]; then
 
-		[ "${branch}" == "HEAD" ] && local branch=$(git rev-parse --short HEAD 2>/dev/null) 
+		[ "${branch}" == "HEAD" ] && local branch=$(git rev-parse --short HEAD 2>/dev/null)
+		#Could probably combine these into one regular expression
+		#We're looking for any lines that start with "A" or "E" or "??" (followed by a space)
 		local untracked=$(git status --porcelain 2>/dev/null| grep "^??" | wc -l | tr -d [[:space:]])
 		local uncommitted=$(git status --porcelain 2>/dev/null| egrep "^(M| M)" | wc -l | tr -d [[:space:]])
-		local changes=$(($untracked + $uncommitted))
+		local added=$(git status --porcelain 2>/dev/null| egrep "^(A| A)" | wc -l | tr -d [[:space:]])
+		local changes=$(($untracked + $uncommitted + $added))
 
 		echo -n " on ${PURPLE}${branch}${RESET}"
 
